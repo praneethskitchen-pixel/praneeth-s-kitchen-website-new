@@ -11,6 +11,7 @@ import MenuSection from "./components/MenuSection";
 import OrderCart from "./components/OrderCart";
 import ReservationSection from "./components/ReservationSection";
 import Footer from "./components/Footer";
+import Logo from "./components/Logo";
 import { MenuItem, CartItem } from "./types";
 import { REVIEWS, FAQS } from "./data";
 import { 
@@ -93,15 +94,10 @@ export default function App() {
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
                   
-                  {/* Left Column: Traditional Kitchen Visuals */}
+                  {/* Left Column: Official Brand Logo Visual */}
                   <div className="lg:col-span-5 relative">
-                    <div className="relative aspect-square max-w-[380px] mx-auto rounded-3xl overflow-hidden p-2.5 bg-cream border border-gold/40 shadow-xl gold-border-glow">
-                      <img
-                        src="https://images.unsplash.com/photo-1610192244261-3f33de3f55e4?q=80&w=600&auto=format&fit=crop"
-                        alt="Authentic Ghee Simmering"
-                        className="w-full h-full object-cover rounded-2xl"
-                        referrerPolicy="no-referrer"
-                      />
+                    <div className="relative aspect-square max-w-[380px] mx-auto rounded-3xl overflow-hidden p-6 bg-cream border border-gold/40 shadow-xl gold-border-glow flex flex-col items-center justify-center">
+                      <Logo size={220} showText={true} />
                       {/* Floating Ghee badge */}
                       <div className="absolute -bottom-4 -right-4 bg-charcoal border border-gold text-gold rounded-2xl p-4 shadow-2xl max-w-[180px] space-y-1">
                         <span className="text-[9px] font-mono font-bold uppercase tracking-wider block text-gold-light">CULINARY STANDARD</span>
@@ -140,7 +136,7 @@ export default function App() {
                         <Sparkles className="h-5 w-5 text-gold" />
                       </div>
                       <div>
-                        <p className="font-serif-elegant font-bold text-lg text-charcoal leading-none">Praneeth Madugula</p>
+                        <p className="font-serif-elegant font-bold text-lg text-charcoal leading-none">Praneeth Kumar Surarapu</p>
                         <p className="text-xs text-gold-dark font-mono mt-1 font-semibold uppercase tracking-wider">Founder & Master Culinary Artisan</p>
                       </div>
                     </div>

@@ -646,8 +646,62 @@ export default function ReservationSection() {
 
                 </div>
 
+                <div className="bg-charcoal-light border-2 border-gold p-5 space-y-3 shadow-lg max-w-md mx-auto text-left">
+                  <p className="text-[10px] font-mono uppercase tracking-widest text-gold text-center font-bold">
+                    📲 DISPATCH TO KITCHEN COORDINATOR
+                  </p>
+                  <p className="text-neutral-300 text-xs text-center leading-relaxed">
+                    To expedite marination schedules, please dispatch your catering receipt directly to Praneeth's Kitchen via WhatsApp or Email!
+                  </p>
+                  <div className="grid grid-cols-1 gap-2.5 pt-1">
+                    {(() => {
+                      const addonText = confirmedCatering.addonDetails ? `\n• Add-on: ${confirmedCatering.addonDetails.name}` : "";
+                      const cateringMessage = `*PRANEETH'S KITCHEN - CATERING REQUEST* 👑
+========================
+*Passcode:* ${confirmedCatering.passcode}
+*Client Name:* ${confirmedCatering.details.name}
+*Phone:* ${confirmedCatering.details.phone}
+*Email:* ${confirmedCatering.details.email}
+*Event Date:* ${confirmedCatering.details.date}
+*Event Time:* ${confirmedCatering.details.time}
+*Fulfillment:* ${confirmedCatering.details.deliveryType.toUpperCase()}
+*${confirmedCatering.details.deliveryType === "delivery" ? "Venue Address" : "Pickup Location"}:* ${confirmedCatering.details.deliveryAddress || "Kitchen Pick-up"}
+
+*CATERING DETAILS:*
+• Main Feast: ${confirmedCatering.itemDetails.name} (${confirmedCatering.details.quantity} ${confirmedCatering.details.pricingBasis === "kgs" ? "Kgs" : "Plates"})${addonText}
+
+*Estimate Quote:* ₹${confirmedCatering.pricing.total}
+========================
+Sent via Praneeth's Kitchen Web Portal.`;
+
+                      const whatsappUrl = `https://wa.me/919154668077?text=${encodeURIComponent(cateringMessage)}`;
+                      const emailSubject = `New Catering Request: ${confirmedCatering.passcode} - ${confirmedCatering.details.name}`;
+                      const emailUrl = `mailto:praneethskitchen@gmail.com?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(cateringMessage)}`;
+
+                      return (
+                        <>
+                          <a
+                            href={whatsappUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="py-3 bg-[#25D366] hover:bg-[#20ba59] text-white font-sans font-bold text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md rounded-none text-center"
+                          >
+                            Send request via WhatsApp 💬
+                          </a>
+                          <a
+                            href={emailUrl}
+                            className="py-3 bg-blue-600 hover:bg-blue-700 text-white font-sans font-bold text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md rounded-none text-center"
+                          >
+                            Send request via Email ✉️
+                          </a>
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
+
                 <p className="text-xs text-neutral-400 max-w-md mx-auto leading-relaxed">
-                  A verification link and invoice estimate copy have been compiled to your phone number. Our catering coordinator will contact you shortly to finalize cooking specifications.
+                  Our catering coordinator will contact you shortly to finalize your custom cooking specifications and handle advanced deposits.
                 </p>
 
                 <div className="pt-4 flex items-center justify-center gap-4">

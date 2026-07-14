@@ -8,6 +8,7 @@ import {
   UtensilsCrossed, Phone, Mail, MapPin, Sparkles, 
   Clock, Heart, ShieldAlert
 } from "lucide-react";
+import Logo from "./Logo";
 
 interface FooterProps {
   setActiveTab: (tab: string) => void;
@@ -29,9 +30,7 @@ export default function Footer({ setActiveTab }: FooterProps) {
           {/* Brand area */}
           <div className="md:col-span-4 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-cream text-charcoal rounded-full border border-gold">
-                <UtensilsCrossed className="h-5 w-5 text-gold-dark" />
-              </div>
+              <Logo size={42} showText={false} className="shrink-0" />
               <div>
                 <span className="text-[9px] tracking-[0.3em] uppercase font-sans text-gold block leading-none mb-1">Est. 2024</span>
                 <h4 className="font-serif-elegant font-bold text-lg tracking-tight text-cream uppercase leading-none">
@@ -81,11 +80,11 @@ export default function Footer({ setActiveTab }: FooterProps) {
               </div>
               <div className="flex items-center gap-2.5">
                 <Phone className="h-4 w-4 text-gold-muted shrink-0" />
-                <span className="font-mono">+91 40 4888 1234</span>
+                <a href="tel:+919154668077" className="font-mono hover:text-gold transition-colors">+91 91546 68077</a>
               </div>
               <div className="flex items-center gap-2.5">
                 <Mail className="h-4 w-4 text-gold-muted shrink-0" />
-                <span className="font-mono">reservations@praneethskitchen.com</span>
+                <a href="mailto:praneethskitchen@gmail.com" className="font-mono hover:text-gold transition-colors">praneethskitchen@gmail.com</a>
               </div>
             </div>
           </div>

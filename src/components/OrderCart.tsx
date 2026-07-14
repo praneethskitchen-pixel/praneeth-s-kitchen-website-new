@@ -7,7 +7,8 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { 
   X, Trash2, Plus, Minus, Printer, Clock, ChefHat, 
-  ShoppingBag, Check, Gift, HelpCircle, Flame, Sparkles
+  ShoppingBag, Check, Gift, HelpCircle, Flame, Sparkles,
+  MessageSquare, Mail
 } from "lucide-react";
 import { CartItem } from "../types";
 
@@ -359,122 +360,174 @@ export default function OrderCart({
                 )}
 
                 {/* --- CASE 4: PREMIUM GOLD PRINTABLE RECEIPT --- */}
-                {checkoutStep === "receipt" && (
-                  <div className="space-y-6">
-                    
-                    {/* Confirmation Graphic */}
-                    <div className="text-center py-4 space-y-2 bg-gold/10 rounded-none border border-gold/30 p-4">
-                      <div className="w-12 h-12 bg-gold text-charcoal rounded-none flex items-center justify-center mx-auto shadow-md">
-                        <Check className="h-6 w-6 font-bold" />
-                      </div>
-                      <h4 className="font-serif-elegant font-bold text-lg text-charcoal-light">A Feast is Set!</h4>
-                      <p className="text-neutral-600 text-xs">
-                        Your order has been registered securely. Your generated order receipt is finalized below.
-                      </p>
-                    </div>
+                {checkoutStep === "receipt" && (() => {
+                  const itemsText = cart.map(item => `• ${item.menuItem.name} (Qty: ${item.quantity}) - ₹${item.menuItem.price * item.quantity}`).join("\n");
+                  const whatsappMessage = `*PRANEETH'S KITCHEN - NEW ORDER* 🍳
+========================
+*Order ID:* ${orderId}
+*Guest Name:* ${customerName}
+*Phone:* ${customerPhone}
+*Type:* ${deliveryType.toUpperCase()}
+*${deliveryType === "delivery" ? "Address" : "Fulfillment"}:* ${customerAddress || "Kitchen Pickup"}
 
-                    {/* Receipt Document Block */}
-                    <div id="printable-receipt" className="bg-white border-2 border-charcoal rounded-none p-5 shadow-md relative overflow-hidden font-mono text-xs text-charcoal space-y-4">
+*ITEMS ORDERED:*
+${itemsText}
+
+*Subtotal:* ₹${subtotal}
+*Taxes (5% GST):* ₹${gstTax}
+*Premium Packaging:* ₹${packagingCharge}
+${deliveryType === "delivery" ? `*Saffron Delivery:* ₹${deliveryCharge}\n` : ""}------------------------
+*GRAND TOTAL BILL:* ₹${total}
+========================
+Sent via Praneeth's Kitchen Web Portal.`;
+
+                  const whatsappUrl = `https://wa.me/919154668077?text=${encodeURIComponent(whatsappMessage)}`;
+                  const emailSubject = `New Order: ${orderId} - ${customerName}`;
+                  const emailUrl = `mailto:praneethskitchen@gmail.com?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(whatsappMessage)}`;
+
+                  return (
+                    <div className="space-y-6">
                       
-                      {/* Decorative Gold Border side strip */}
-                      <div className="absolute top-0 left-0 bottom-0 w-1.5 bg-gold" />
-
-                      {/* Header block */}
-                      <div className="text-center border-b border-dashed border-neutral-300 pb-3 space-y-1">
-                        <h5 className="font-bold text-sm tracking-widest text-charcoal">PRANEETH'S KITCHEN</h5>
-                        <p className="text-[10px] text-neutral-500">Saffron Heritage Dining Store</p>
-                        <p className="text-[10px] text-neutral-500">Date: {new Date().toLocaleDateString()} | Time: {new Date().toLocaleTimeString()}</p>
-                        <p className="text-[11px] font-bold text-gold-dark uppercase tracking-widest">ORDER NO: {orderId}</p>
-                      </div>
-
-                      {/* Delivery details */}
-                      <div className="space-y-1 border-b border-dashed border-neutral-200 pb-3">
-                        <p className="font-bold text-[11px] uppercase text-neutral-800">GUEST INFO:</p>
-                        <p><span className="text-neutral-500">Name :</span> {customerName}</p>
-                        <p><span className="text-neutral-500">Phone:</span> {customerPhone}</p>
-                        {deliveryType === "delivery" ? (
-                          <p className="line-clamp-2"><span className="text-neutral-500">Addr :</span> {customerAddress}</p>
-                        ) : (
-                          <p className="text-gold-dark font-bold"><span className="text-neutral-500">Type :</span> Self Pickup at Royal Kitchen</p>
-                        )}
-                      </div>
-
-                      {/* Items breakdown */}
-                      <div className="space-y-2 border-b border-dashed border-neutral-200 pb-3">
-                        <p className="font-bold text-[11px] uppercase text-neutral-800 flex justify-between">
-                          <span>ITEM DESCRIPTION</span>
-                          <span>QTY/SUB</span>
+                      {/* Confirmation Graphic */}
+                      <div className="text-center py-4 space-y-2 bg-gold/10 rounded-none border border-gold/30 p-4">
+                        <div className="w-12 h-12 bg-gold text-charcoal rounded-none flex items-center justify-center mx-auto shadow-md">
+                          <Check className="h-6 w-6 font-bold" />
+                        </div>
+                        <h4 className="font-serif-elegant font-bold text-lg text-charcoal-light">A Feast is Set!</h4>
+                        <p className="text-neutral-600 text-xs">
+                          Your order has been registered securely. Please dispatch your order receipt to our kitchen below.
                         </p>
-                        <div className="space-y-1.5">
-                          {cart.map((item) => (
-                            <div key={item.menuItem.id} className="flex justify-between text-neutral-700">
-                              <div className="max-w-[70%]">
-                                <p className="font-semibold">{item.menuItem.name}</p>
-                                {item.specialInstructions && (
-                                  <p className="text-[9px] text-gold-dark italic">*{item.specialInstructions}</p>
-                                )}
+                      </div>
+
+                      {/* Direct Dispatch Actions Block */}
+                      <div className="bg-charcoal border-2 border-gold p-4 space-y-3 shadow-lg">
+                        <p className="text-[10px] font-mono uppercase tracking-widest text-gold text-center font-bold">
+                          📲 ACTIVATE DISPATCH FOR KITCHEN
+                        </p>
+                        <p className="text-cream text-[11px] text-center max-w-xs mx-auto leading-relaxed">
+                          To finalize your order, tap below to automatically send your receipt to Praneeth's Kitchen via WhatsApp or Email!
+                        </p>
+                        <div className="grid grid-cols-1 gap-2.5 pt-1">
+                          <a
+                            href={whatsappUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="py-3 bg-[#25D366] hover:bg-[#20ba59] text-white font-sans font-bold text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md rounded-none text-center"
+                          >
+                            <MessageSquare className="h-4 w-4 fill-white" /> Dispatch via WhatsApp
+                          </a>
+                          <a
+                            href={emailUrl}
+                            className="py-3 bg-blue-600 hover:bg-blue-700 text-white font-sans font-bold text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md rounded-none text-center"
+                          >
+                            <Mail className="h-4 w-4" /> Dispatch via Email
+                          </a>
+                        </div>
+                      </div>
+
+                      {/* Receipt Document Block */}
+                      <div id="printable-receipt" className="bg-white border-2 border-charcoal rounded-none p-5 shadow-md relative overflow-hidden font-mono text-xs text-charcoal space-y-4">
+                        
+                        {/* Decorative Gold Border side strip */}
+                        <div className="absolute top-0 left-0 bottom-0 w-1.5 bg-gold" />
+
+                        {/* Header block */}
+                        <div className="text-center border-b border-dashed border-neutral-300 pb-3 space-y-1">
+                          <h5 className="font-bold text-sm tracking-widest text-charcoal">PRANEETH'S KITCHEN</h5>
+                          <p className="text-[10px] text-neutral-500">Saffron Heritage Dining Store</p>
+                          <p className="text-[10px] text-neutral-500">Date: {new Date().toLocaleDateString()} | Time: {new Date().toLocaleTimeString()}</p>
+                          <p className="text-[11px] font-bold text-gold-dark uppercase tracking-widest">ORDER NO: {orderId}</p>
+                        </div>
+
+                        {/* Delivery details */}
+                        <div className="space-y-1 border-b border-dashed border-neutral-200 pb-3">
+                          <p className="font-bold text-[11px] uppercase text-neutral-800">GUEST INFO:</p>
+                          <p><span className="text-neutral-500">Name :</span> {customerName}</p>
+                          <p><span className="text-neutral-500">Phone:</span> {customerPhone}</p>
+                          {deliveryType === "delivery" ? (
+                            <p className="line-clamp-2"><span className="text-neutral-500">Addr :</span> {customerAddress}</p>
+                          ) : (
+                            <p className="text-gold-dark font-bold"><span className="text-neutral-500">Type :</span> Self Pickup at Royal Kitchen</p>
+                          )}
+                        </div>
+
+                        {/* Items breakdown */}
+                        <div className="space-y-2 border-b border-dashed border-neutral-200 pb-3">
+                          <p className="font-bold text-[11px] uppercase text-neutral-800 flex justify-between">
+                            <span>ITEM DESCRIPTION</span>
+                            <span>QTY/SUB</span>
+                          </p>
+                          <div className="space-y-1.5">
+                            {cart.map((item) => (
+                              <div key={item.menuItem.id} className="flex justify-between text-neutral-700">
+                                <div className="max-w-[70%]">
+                                  <p className="font-semibold">{item.menuItem.name}</p>
+                                  {item.specialInstructions && (
+                                    <p className="text-[9px] text-gold-dark italic">*{item.specialInstructions}</p>
+                                  )}
+                                </div>
+                                <span>{item.quantity} x ₹{item.menuItem.price}</span>
                               </div>
-                              <span>{item.quantity} x ₹{item.menuItem.price}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Financial Sum */}
-                      <div className="space-y-1 pt-1 text-neutral-700">
-                        <div className="flex justify-between">
-                          <span>Subtotal:</span>
-                          <span>₹{subtotal}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Taxes (5% GST):</span>
-                          <span>₹{gstTax}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Premium Box Packaging:</span>
-                          <span>₹{packagingCharge}</span>
-                        </div>
-                        {deliveryType === "delivery" && (
-                          <div className="flex justify-between">
-                            <span>Saffron Courier:</span>
-                            <span>₹{deliveryCharge}</span>
+                            ))}
                           </div>
-                        )}
-                        <div className="flex justify-between font-bold text-charcoal border-t border-dashed border-neutral-300 pt-2 text-sm">
-                          <span>AMOUNT CHARGED:</span>
-                          <span>₹{total}</span>
                         </div>
+
+                        {/* Financial Sum */}
+                        <div className="space-y-1 pt-1 text-neutral-700">
+                          <div className="flex justify-between">
+                            <span>Subtotal:</span>
+                            <span>₹{subtotal}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Taxes (5% GST):</span>
+                            <span>₹{gstTax}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Premium Box Packaging:</span>
+                            <span>₹{packagingCharge}</span>
+                          </div>
+                          {deliveryType === "delivery" && (
+                            <div className="flex justify-between">
+                              <span>Saffron Courier:</span>
+                              <span>₹{deliveryCharge}</span>
+                            </div>
+                          )}
+                          <div className="flex justify-between font-bold text-charcoal border-t border-dashed border-neutral-300 pt-2 text-sm">
+                            <span>AMOUNT CHARGED:</span>
+                            <span>₹{total}</span>
+                          </div>
+                        </div>
+
+                        {/* Slogan */}
+                        <div className="text-center pt-4 border-t border-neutral-200 space-y-1 text-neutral-500 text-[10px]">
+                          <p>Thank you for choosing Praneeth's Kitchen!</p>
+                          <p>Prepared using Pure Cow Ghee and Raw Spices.</p>
+                          <div className="w-full h-8 flex items-center justify-center bg-neutral-100 text-[9px] border border-neutral-200 rounded-none font-mono text-center tracking-[4px] text-neutral-700 select-none">
+                            *PRANEETHSKITCHEN*
+                          </div>
+                        </div>
+
                       </div>
 
-                      {/* Slogan */}
-                      <div className="text-center pt-4 border-t border-neutral-200 space-y-1 text-neutral-500 text-[10px]">
-                        <p>Thank you for choosing Praneeth's Kitchen!</p>
-                        <p>Prepared using Pure Cow Ghee and Raw Spices.</p>
-                        <div className="w-full h-8 flex items-center justify-center bg-neutral-100 text-[9px] border border-neutral-200 rounded-none font-mono text-center tracking-[4px] text-neutral-700 select-none">
-                          *PRANEETHSKITCHEN*
-                        </div>
+                      {/* Receipt Action Buttons */}
+                      <div className="grid grid-cols-2 gap-3 pt-2">
+                        <button
+                          onClick={handlePrintReceipt}
+                          className="py-2.5 bg-cream hover:bg-charcoal hover:text-gold text-charcoal font-sans font-bold text-xs uppercase tracking-widest border border-charcoal rounded-none transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                        >
+                          <Printer className="h-4 w-4" /> Save Receipt
+                        </button>
+                        <button
+                          onClick={handleStartTracking}
+                          className="py-2.5 bg-charcoal hover:bg-cream hover:text-charcoal text-gold font-sans font-bold text-xs uppercase tracking-widest border border-gold rounded-none transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                        >
+                          <Clock className="h-4 w-4 animate-spin-slow" /> Track Kitchen
+                        </button>
                       </div>
 
                     </div>
-
-                    {/* Receipt Action Buttons */}
-                    <div className="grid grid-cols-2 gap-3 pt-2">
-                      <button
-                        onClick={handlePrintReceipt}
-                        className="py-2.5 bg-cream hover:bg-charcoal hover:text-gold text-charcoal font-sans font-bold text-xs uppercase tracking-widest border border-charcoal rounded-none transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                      >
-                        <Printer className="h-4 w-4" /> Save Receipt
-                      </button>
-                      <button
-                        onClick={handleStartTracking}
-                        className="py-2.5 bg-charcoal hover:bg-cream hover:text-charcoal text-gold font-sans font-bold text-xs uppercase tracking-widest border border-gold rounded-none transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                      >
-                        <Clock className="h-4 w-4 animate-spin-slow" /> Track Kitchen
-                      </button>
-                    </div>
-
-                  </div>
-                )}
+                  );
+                })()}
 
                 {/* --- CASE 5: LIVE KITCHEN COOKING TRACKER --- */}
                 {checkoutStep === "cooking" && (

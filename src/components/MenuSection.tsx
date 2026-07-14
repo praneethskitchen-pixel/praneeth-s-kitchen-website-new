@@ -70,6 +70,136 @@ export default function MenuSection({ onAddItem, onUpdateCartQuantity, cart }: M
     return found ? found.quantity : 0;
   };
 
+  const vegItems = useMemo(() => filteredItems.filter(item => item.isVeg), [filteredItems]);
+  const nonVegItems = useMemo(() => filteredItems.filter(item => !item.isVeg), [filteredItems]);
+
+  const renderItemGrid = (items: MenuItem[]) => {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <AnimatePresence mode="popLayout">
+          {items.map((item, index) => {
+            const quantityInCart = getItemCartQuantity(item.id);
+            return (
+              <motion.div
+                key={item.id}
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.4, delay: index * 0.05 }}
+                className="bg-cream-light border border-gold hover:border-charcoal overflow-hidden shadow-none transition-all duration-300 flex flex-col group relative rounded-none"
+              >
+                
+                {/* Chef Special Tag */}
+                {item.isChefSpecial && (
+                  <span className="absolute top-4 left-4 z-10 bg-gold text-charcoal font-serif-elegant font-bold text-[9px] tracking-widest uppercase px-3 py-1 border border-charcoal flex items-center gap-1 rounded-none shadow">
+                    <Sparkles className="h-3 w-3 fill-charcoal text-charcoal" />
+                    Chef's Special
+                  </span>
+                )}
+
+                {/* Veg/Non-veg Dot icon */}
+                <span className="absolute top-4 right-4 z-10 p-1.5 bg-cream-light/95 backdrop-blur border border-gold/40 flex items-center justify-center rounded-none">
+                  <span className={`w-3 h-3 rounded-none ${item.isVeg ? "bg-green-600" : "bg-red-600"}`} title={item.isVeg ? "Vegetarian" : "Non-Vegetarian"} />
+                </span>
+
+                {/* Image Area with Zoom */}
+                <div className="relative aspect-[4/3] overflow-hidden bg-cream-dark">
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-charcoal/40 to-transparent" />
+                  
+                  {/* Cost Overlay */}
+                  <span className="absolute bottom-4 right-4 bg-charcoal text-gold font-mono font-bold text-base px-3 py-1 border-2 border-gold rounded-none">
+                    ₹{item.price}
+                  </span>
+                </div>
+
+                {/* Card Content */}
+                <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
+                  
+                  <div className="space-y-2">
+                    {/* Rating & Spice */}
+                    <div className="flex items-center justify-between text-xs text-neutral-500">
+                      <span className="flex items-center gap-1 bg-gold/10 text-gold-dark px-2 py-0.5 rounded font-bold font-mono">
+                        <Star className="h-3 w-3 fill-gold text-gold" />
+                        {item.rating} ({item.reviewsCount})
+                      </span>
+                      
+                      {item.spiciness > 0 && (
+                        <span className="font-medium text-red-600 flex items-center gap-0.5">
+                          {Array.from({ length: item.spiciness }).map((_, i) => (
+                            <span key={i}>🌶️</span>
+                          ))}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Title */}
+                    <h4 className="font-serif-elegant font-bold text-xl text-charcoal group-hover:text-gold-dark transition-colors duration-200">
+                      {item.name}
+                    </h4>
+
+                    {/* Description */}
+                    <p className="text-neutral-600 text-xs sm:text-sm line-clamp-3 leading-relaxed">
+                      {item.description}
+                    </p>
+                  </div>
+
+                  {/* Tags */}
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {item.tags.map((tag, i) => (
+                      <span key={i} className="text-[10px] font-semibold bg-cream-dark text-neutral-700 px-2 py-0.5 rounded-md">
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Interactive Add Actions */}
+                  <div className="pt-4 border-t border-gold/15 flex items-center justify-between gap-3">
+                    {quantityInCart > 0 ? (
+                      <div className="flex items-center bg-charcoal border border-gold rounded-none w-full justify-between p-1">
+                        <button
+                          onClick={() => onUpdateCartQuantity(item.id, -1)}
+                          className="p-2 text-gold hover:text-cream transition-colors cursor-pointer"
+                          aria-label="Decrease"
+                        >
+                          <Minus className="h-4 w-4" />
+                        </button>
+                        <span className="text-cream font-mono font-bold text-sm">
+                          {quantityInCart} added
+                        </span>
+                        <button
+                          onClick={() => onUpdateCartQuantity(item.id, 1)}
+                          className="p-2 text-gold hover:text-cream transition-colors cursor-pointer"
+                          aria-label="Increase"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => handleOpenCustomizer(item)}
+                        className="w-full py-2.5 bg-cream-light hover:bg-charcoal text-charcoal hover:text-gold font-sans font-bold text-xs uppercase tracking-widest rounded-none border border-charcoal transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+                      >
+                        <Plus className="h-3.5 w-3.5 text-gold" /> Add to Order
+                      </button>
+                    )}
+                  </div>
+
+                </div>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+      </div>
+    );
+  };
+
   const handleOpenCustomizer = (item: MenuItem) => {
     setCustomizingItem(item);
     setCustomSpice(item.spiciness);
@@ -274,127 +404,48 @@ export default function MenuSection({ onAddItem, onUpdateCartQuantity, cart }: M
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <AnimatePresence mode="popLayout">
-              {filteredItems.map((item, index) => {
-                const quantityInCart = getItemCartQuantity(item.id);
-                return (
-                  <motion.div
-                    key={item.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.4, delay: index * 0.05 }}
-                    className="bg-cream-light border border-gold hover:border-charcoal overflow-hidden shadow-none transition-all duration-300 flex flex-col group relative rounded-none"
-                  >
-                    
-                    {/* Chef Special Tag */}
-                    {item.isChefSpecial && (
-                      <span className="absolute top-4 left-4 z-10 bg-gold text-charcoal font-serif-elegant font-bold text-[9px] tracking-widest uppercase px-3 py-1 border border-charcoal flex items-center gap-1 rounded-none shadow">
-                        <Sparkles className="h-3 w-3 fill-charcoal text-charcoal" />
-                        Chef's Special
-                      </span>
-                    )}
+          <div className="space-y-16">
+            {/* 🥦 Pure Vegetarian Pleasures Section */}
+            {(vegFilter === "all" || vegFilter === "veg") && vegItems.length > 0 && (
+              <div className="space-y-6">
+                <div className="border-b border-gold/25 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <div className="space-y-1">
+                    <h3 className="font-serif-elegant font-bold text-2xl text-charcoal flex items-center gap-2.5">
+                      <span className="w-4 h-4 rounded-full bg-green-600 inline-block" />
+                      Pure Vegetarian Pleasures 🥦
+                    </h3>
+                    <p className="text-neutral-500 text-xs sm:text-sm">
+                      Authentic cottage cheese specialties, slow-cooked vegetable medleys, and sweet delicacies prepared under gold kitchen standards.
+                    </p>
+                  </div>
+                  <span className="font-mono text-xs font-bold text-gold-dark bg-gold/10 px-3 py-1 shrink-0 self-start sm:self-center border border-gold/20">
+                    {vegItems.length} Vegetarian Dish{vegItems.length > 1 ? "es" : ""}
+                  </span>
+                </div>
+                {renderItemGrid(vegItems)}
+              </div>
+            )}
 
-                    {/* Veg/Non-veg Dot icon */}
-                    <span className="absolute top-4 right-4 z-10 p-1.5 bg-cream-light/95 backdrop-blur border border-gold/40 flex items-center justify-center rounded-none">
-                      <span className={`w-3 h-3 rounded-none ${item.isVeg ? "bg-green-600" : "bg-red-600"}`} title={item.isVeg ? "Vegetarian" : "Non-Vegetarian"} />
-                    </span>
-
-                    {/* Image Area with Zoom */}
-                    <div className="relative aspect-[4/3] overflow-hidden bg-cream-dark">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        referrerPolicy="no-referrer"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-charcoal/40 to-transparent" />
-                      
-                      {/* Cost Overlay */}
-                      <span className="absolute bottom-4 right-4 bg-charcoal text-gold font-mono font-bold text-base px-3 py-1 border-2 border-gold rounded-none">
-                        ₹{item.price}
-                      </span>
-                    </div>
-
-                    {/* Card Content */}
-                    <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
-                      
-                      <div className="space-y-2">
-                        {/* Rating & Spice */}
-                        <div className="flex items-center justify-between text-xs text-neutral-500">
-                          <span className="flex items-center gap-1 bg-gold/10 text-gold-dark px-2 py-0.5 rounded font-bold font-mono">
-                            <Star className="h-3 w-3 fill-gold text-gold" />
-                            {item.rating} ({item.reviewsCount})
-                          </span>
-                          
-                          {item.spiciness > 0 && (
-                            <span className="font-medium text-red-600 flex items-center gap-0.5">
-                              {Array.from({ length: item.spiciness }).map((_, i) => (
-                                <span key={i}>🌶️</span>
-                              ))}
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Title */}
-                        <h4 className="font-serif-elegant font-bold text-xl text-charcoal group-hover:text-gold-dark transition-colors duration-200">
-                          {item.name}
-                        </h4>
-
-                        {/* Description */}
-                        <p className="text-neutral-600 text-xs sm:text-sm line-clamp-3 leading-relaxed">
-                          {item.description}
-                        </p>
-                      </div>
-
-                      {/* Tags */}
-                      <div className="flex flex-wrap gap-1.5 pt-1">
-                        {item.tags.map((tag, i) => (
-                          <span key={i} className="text-[10px] font-semibold bg-cream-dark text-neutral-700 px-2 py-0.5 rounded-md">
-                            #{tag}
-                          </span>
-                        ))}
-                      </div>
-
-                      {/* Interactive Add Actions */}
-                      <div className="pt-4 border-t border-gold/15 flex items-center justify-between gap-3">
-                        {quantityInCart > 0 ? (
-                          <div className="flex items-center bg-charcoal border border-gold rounded-none w-full justify-between p-1">
-                            <button
-                              onClick={() => onUpdateCartQuantity(item.id, -1)}
-                              className="p-2 text-gold hover:text-cream transition-colors cursor-pointer"
-                              aria-label="Decrease"
-                            >
-                              <Minus className="h-4 w-4" />
-                            </button>
-                            <span className="text-cream font-mono font-bold text-sm">
-                              {quantityInCart} added
-                            </span>
-                            <button
-                              onClick={() => onUpdateCartQuantity(item.id, 1)}
-                              className="p-2 text-gold hover:text-cream transition-colors cursor-pointer"
-                              aria-label="Increase"
-                            >
-                              <Plus className="h-4 w-4" />
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => handleOpenCustomizer(item)}
-                            className="w-full py-2.5 bg-cream-light hover:bg-charcoal text-charcoal hover:text-gold font-sans font-bold text-xs uppercase tracking-widest rounded-none border border-charcoal transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
-                          >
-                            <Plus className="h-3.5 w-3.5 text-gold" /> Add to Order
-                          </button>
-                        )}
-                      </div>
-
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
+            {/* 🍗 Royal Non-Vegetarian Delights Section */}
+            {(vegFilter === "all" || vegFilter === "nonveg") && nonVegItems.length > 0 && (
+              <div className="space-y-6">
+                <div className="border-b border-gold/25 pb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <div className="space-y-1">
+                    <h3 className="font-serif-elegant font-bold text-2xl text-charcoal flex items-center gap-2.5">
+                      <span className="w-4 h-4 rounded-full bg-red-600 inline-block" />
+                      Royal Non-Vegetarian Delights 🍗
+                    </h3>
+                    <p className="text-neutral-500 text-xs sm:text-sm">
+                      Signature slow-dum basmati rice with overnight ghee marination, fiery regional starters, and traditional slow-cooked curries.
+                    </p>
+                  </div>
+                  <span className="font-mono text-xs font-bold text-gold-dark bg-gold/10 px-3 py-1 shrink-0 self-start sm:self-center border border-gold/20">
+                    {nonVegItems.length} Non-Veg Dish{nonVegItems.length > 1 ? "es" : ""}
+                  </span>
+                </div>
+                {renderItemGrid(nonVegItems)}
+              </div>
+            )}
           </div>
         )}
 
