@@ -1,0 +1,6 @@
+{
+  "name": "Praneeth's Kitchen",
+  "description": "An elegant, premium culinary experience serving authentic Biryanis, Pulaos, Ragi Mudde, Sweets, Curries, Fries, Bakery items, and Snacks.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
