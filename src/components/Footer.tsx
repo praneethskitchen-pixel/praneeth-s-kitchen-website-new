@@ -30,10 +30,10 @@ export default function Footer({ setActiveTab }: FooterProps) {
           {/* Brand area */}
           <div className="md:col-span-4 space-y-4">
             <div className="flex items-center gap-3">
-              <Logo size={42} showText={false} className="shrink-0" />
+              <Logo size={50} showText={false} className="shrink-0" />
               <div>
-                <span className="text-[9px] tracking-[0.3em] uppercase font-sans text-gold block leading-none mb-1">Est. 2024</span>
-                <h4 className="font-serif-elegant font-bold text-lg tracking-tight text-cream uppercase leading-none">
+                <span className="text-[9px] tracking-[0.3em] uppercase font-sans text-gold block leading-none mb-1 font-semibold">Est. 2024</span>
+                <h4 className="font-serif-elegant font-bold text-lg sm:text-xl tracking-tight text-cream uppercase leading-none">
                   PRANEETH'S KITCHEN
                 </h4>
               </div>

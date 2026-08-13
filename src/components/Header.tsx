@@ -29,12 +29,12 @@ export default function Header({ activeTab, setActiveTab, cartCount, openCart }:
           {/* Logo Brand Area */}
           <div 
             onClick={() => setActiveTab("home")} 
-            className="flex items-center gap-2 sm:gap-3 cursor-pointer group"
+            className="flex items-center gap-2.5 sm:gap-3.5 cursor-pointer group"
           >
-            <Logo size={42} showText={false} className="shrink-0" />
+            <Logo size={50} showText={false} className="shrink-0" />
             <div>
-              <span className="text-[8px] tracking-[0.3em] uppercase font-sans text-gold block leading-none mb-1">Est. 2024</span>
-              <h1 className="font-serif-elegant font-bold text-base sm:text-lg tracking-tight text-charcoal uppercase leading-none group-hover:text-gold transition-colors">
+              <span className="text-[8px] sm:text-[9px] tracking-[0.3em] uppercase font-sans text-gold block leading-none mb-1 font-semibold">Est. 2024</span>
+              <h1 className="font-serif-elegant font-bold text-base sm:text-xl tracking-tight text-charcoal uppercase leading-none group-hover:text-gold transition-colors">
                 PRANEETH'S KITCHEN
               </h1>
             </div>
