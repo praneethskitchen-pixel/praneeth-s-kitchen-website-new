@@ -127,6 +127,15 @@ export default function Footer({ setActiveTab, openAdminOrders }: FooterProps) {
           <div className="flex items-center gap-4">
             <span className="hover:text-gold transition-colors cursor-pointer">Privacy Charter</span>
             <span className="hover:text-gold transition-colors cursor-pointer">Service Guidelines</span>
+            {openAdminOrders && (
+              <button 
+                onClick={openAdminOrders}
+                className="text-neutral-500 hover:text-gold transition-colors text-[10px] flex items-center gap-1 font-mono"
+                title="Staff Orders Log Portal (Ctrl + Shift + O)"
+              >
+                🔒 Staff Access
+              </button>
+            )}
             <span className="flex items-center gap-1 text-gold-muted">
               <Heart className="h-3.5 w-3.5 text-gold fill-gold" /> Handcrafted with Ghee
             </span>

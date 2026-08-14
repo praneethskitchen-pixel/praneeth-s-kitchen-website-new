@@ -26,7 +26,7 @@ export default function App() {
   const [isAdminOrdersOpen, setIsAdminOrdersOpen] = useState<boolean>(false);
   const [faqOpenIdx, setFaqOpenIdx] = useState<number | null>(null);
 
-  // Auto-detect secret route /orderslog, /#orderslog, or ?orderslog
+  // Auto-detect secret route /orderslog, /#orderslog, or ?orderslog and keyboard shortcut
   useEffect(() => {
     const checkUrlRoute = () => {
       const path = window.location.pathname.toLowerCase();
@@ -43,12 +43,22 @@ export default function App() {
       }
     };
 
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl + Shift + O or Cmd + Shift + O
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "o") {
+        e.preventDefault();
+        setIsAdminOrdersOpen((prev) => !prev);
+      }
+    };
+
     checkUrlRoute();
     window.addEventListener("popstate", checkUrlRoute);
     window.addEventListener("hashchange", checkUrlRoute);
+    window.addEventListener("keydown", handleKeyDown);
     return () => {
       window.removeEventListener("popstate", checkUrlRoute);
       window.removeEventListener("hashchange", checkUrlRoute);
+      window.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
 
