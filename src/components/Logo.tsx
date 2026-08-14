@@ -13,20 +13,27 @@ interface LogoProps {
 }
 
 export default function Logo({ className = "", size = 64, showText = true, variant = "auto" }: LogoProps) {
-  const [imgError, setImgError] = useState(false);
+  const [sourceIndex, setSourceIndex] = useState(0);
+  const logoSources = ["/logo.png", "/logo.svg"];
+
+  const handleImageError = () => {
+    setSourceIndex((prev) => prev + 1);
+  };
+
+  const currentSource = logoSources[sourceIndex];
 
   return (
     <div className={`inline-flex flex-col items-center justify-center ${className}`}>
-      {!imgError ? (
+      {currentSource ? (
         <div 
           className="relative flex items-center justify-center rounded-xl transition-all duration-300 hover:scale-105 shrink-0"
           style={{ width: size, height: size }}
         >
           <img
-            src="/logo.svg"
+            src={currentSource}
             alt="Praneeth's Kitchen Logo"
             className="w-full h-full object-contain drop-shadow-md rounded-lg"
-            onError={() => setImgError(true)}
+            onError={handleImageError}
             referrerPolicy="no-referrer"
           />
         </div>
