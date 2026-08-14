@@ -11,6 +11,7 @@ import MenuSection from "./components/MenuSection";
 import OrderCart from "./components/OrderCart";
 import ReservationSection from "./components/ReservationSection";
 import Footer from "./components/Footer";
+import AdminOrdersModal from "./components/AdminOrdersModal";
 import Logo from "./components/Logo";
 import { MenuItem, CartItem } from "./types";
 import { REVIEWS, FAQS } from "./data";
@@ -22,6 +23,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<string>("home");
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
+  const [isAdminOrdersOpen, setIsAdminOrdersOpen] = useState<boolean>(false);
   const [faqOpenIdx, setFaqOpenIdx] = useState<number | null>(null);
 
   // Shopping Cart Managers
@@ -76,6 +78,7 @@ export default function App() {
         setActiveTab={setActiveTab}
         cartCount={totalCartCount}
         openCart={() => setIsCartOpen(true)}
+        openAdminOrders={() => setIsAdminOrdersOpen(true)}
       />
 
       {/* 2. Main Tabbed Content routing */}
@@ -339,7 +342,16 @@ export default function App() {
       />
 
       {/* 4. Global Footer block */}
-      <Footer setActiveTab={setActiveTab} />
+      <Footer 
+        setActiveTab={setActiveTab} 
+        openAdminOrders={() => setIsAdminOrdersOpen(true)}
+      />
+
+      {/* 5. Kitchen Order Log & Excel Database Modal */}
+      <AdminOrdersModal
+        isOpen={isAdminOrdersOpen}
+        onClose={() => setIsAdminOrdersOpen(false)}
+      />
 
     </div>
   );

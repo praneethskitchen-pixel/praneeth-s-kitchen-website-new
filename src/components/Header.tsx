@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import { UtensilsCrossed, ShoppingBag, Calendar, Sparkles, BookOpen, Clock, Phone } from "lucide-react";
+import { UtensilsCrossed, ShoppingBag, Calendar, Sparkles, BookOpen, Clock, Phone, FileSpreadsheet } from "lucide-react";
 import Logo from "./Logo";
 
 interface HeaderProps {
@@ -12,9 +12,10 @@ interface HeaderProps {
   setActiveTab: (tab: string) => void;
   cartCount: number;
   openCart: () => void;
+  openAdminOrders?: () => void;
 }
 
-export default function Header({ activeTab, setActiveTab, cartCount, openCart }: HeaderProps) {
+export default function Header({ activeTab, setActiveTab, cartCount, openCart, openAdminOrders }: HeaderProps) {
   const navItems = [
     { id: "home", label: "Home", icon: Sparkles },
     { id: "menu", label: "Our Menu", icon: BookOpen },
@@ -73,6 +74,18 @@ export default function Header({ activeTab, setActiveTab, cartCount, openCart }:
                 <p className="text-[11px] font-medium font-mono">11:00 AM - 11:30 PM</p>
               </div>
             </div>
+
+            {/* Order Log & Excel Database Trigger */}
+            {openAdminOrders && (
+              <button
+                onClick={openAdminOrders}
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-800/90 hover:bg-emerald-900 text-cream rounded-full border border-emerald-500 text-[10px] uppercase font-mono font-bold tracking-wider shadow-sm transition-all hover:scale-105"
+                title="View Orders & Export to Excel (.csv)"
+              >
+                <FileSpreadsheet className="h-3.5 w-3.5 text-emerald-300" />
+                <span className="hidden md:inline">Orders Log</span>
+              </button>
+            )}
 
             {/* Simulated Checkout Cart Trigger */}
             <button

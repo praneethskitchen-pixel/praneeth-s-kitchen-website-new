@@ -10,7 +10,8 @@ import {
   ShoppingBag, Check, Gift, HelpCircle, Flame, Sparkles,
   MessageSquare, Mail
 } from "lucide-react";
-import { CartItem } from "../types";
+import { CartItem, OrderRecord } from "../types";
+import { syncOrderToCloud } from "../utils/cloudSync";
 
 interface OrderCartProps {
   isOpen: boolean;
@@ -82,12 +83,64 @@ export default function OrderCart({
 
     setCheckoutStep("submitting");
     
-    // Simulate API delay
+    const generatedId = `PK-${Math.floor(100000 + Math.random() * 900000)}`;
+    setOrderId(generatedId);
+
+    // Prepare WhatsApp message
+    const itemsText = cart.map(item => `• ${item.menuItem.name} (Qty: ${item.quantity}) - ₹${item.menuItem.price * item.quantity}`).join("\n");
+    const whatsappMessage = `*PRANEETH'S KITCHEN - NEW ORDER* 🍳
+========================
+*Order ID:* ${generatedId}
+*Guest Name:* ${customerName}
+*Phone:* ${customerPhone}
+*Type:* ${deliveryType.toUpperCase()}
+*${deliveryType === "delivery" ? "Delivery Address" : "Fulfillment"}:* ${customerAddress || "Kitchen Pickup"}
+
+*ITEMS ORDERED:*
+${itemsText}
+
+*Subtotal:* ₹${subtotal}
+*Taxes (5% GST):* ₹${gstTax}
+*Packaging:* ₹${packagingCharge}
+${deliveryType === "delivery" ? `*Delivery Charge:* ₹${deliveryCharge}\n` : ""}------------------------
+*GRAND TOTAL BILL:* ₹${total}
+========================
+Sent via Praneeth's Kitchen Web Portal.`;
+
+    const whatsappUrl = `https://wa.me/919154668077?text=${encodeURIComponent(whatsappMessage)}`;
+
+    // Save order record to persistent local database for Excel export
+    try {
+      const orderRecord: OrderRecord = {
+        id: generatedId,
+        type: "online_order",
+        customerName,
+        customerPhone,
+        deliveryType,
+        address: customerAddress || "Kitchen Pickup",
+        itemsSummary: cart.map(item => `${item.menuItem.name} (x${item.quantity})`).join(", "),
+        totalAmount: total,
+        timestamp: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
+        status: "Received"
+      };
+      const existing = JSON.parse(localStorage.getItem("pk_orders_database") || "[]");
+      localStorage.setItem("pk_orders_database", JSON.stringify([orderRecord, ...existing]));
+      
+      // Auto-sync to Cloud Spreadsheet Webhook (if enabled)
+      syncOrderToCloud(orderRecord);
+    } catch (err) {
+      console.error("Local order storage error:", err);
+    }
+
     setTimeout(() => {
-      const generatedId = `PK-${Math.floor(100000 + Math.random() * 900000)}`;
-      setOrderId(generatedId);
       setCheckoutStep("receipt");
-    }, 1500);
+      // Try auto-opening WhatsApp tab
+      try {
+        window.open(whatsappUrl, "_blank");
+      } catch (err) {
+        console.log("Popup blocked auto-open:", err);
+      }
+    }, 1200);
   };
 
   const handleStartTracking = () => {

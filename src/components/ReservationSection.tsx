@@ -11,6 +11,8 @@ import {
   Printer, Trash2, Flame, Heart, Star
 } from "lucide-react";
 import { MENU_ITEMS } from "../data";
+import { OrderRecord } from "../types";
+import { syncOrderToCloud } from "../utils/cloudSync";
 
 export default function ReservationSection() {
   // Form State
@@ -114,9 +116,55 @@ export default function ReservationSection() {
 
     setIsSubmitting(true);
 
-    // Simulate luxury API response
+    const generatedPasscode = `CATER-PK-${Math.floor(10000 + Math.random() * 90000)}`;
+    const addonText = addonItem ? `\n• Add-on: ${addonItem.name}` : "";
+    const cateringMessage = `*PRANEETH'S KITCHEN - CATERING REQUEST* 👑
+========================
+*Passcode:* ${generatedPasscode}
+*Client Name:* ${formData.name}
+*Phone:* ${formData.phone}
+*Email:* ${formData.email || "N/A"}
+*Event Date:* ${formData.date}
+*Event Time:* ${formData.time}
+*Fulfillment:* ${formData.deliveryType.toUpperCase()}
+*${formData.deliveryType === "delivery" ? "Venue Address" : "Pickup Location"}:* ${formData.deliveryAddress || "Kitchen Pick-up"}
+
+*CATERING DETAILS:*
+• Main Feast: ${selectedItem.name} (${formData.quantity} ${formData.pricingBasis === "kgs" ? "Kgs" : "Plates"})${addonText}
+
+*Estimate Quote:* ₹${estimate.total}
+========================
+Sent via Praneeth's Kitchen Web Portal.`;
+
+    const whatsappUrl = `https://wa.me/919154668077?text=${encodeURIComponent(cateringMessage)}`;
+
+    // Save order record to persistent local database for Excel export
+    try {
+      const orderRecord: OrderRecord = {
+        id: generatedPasscode,
+        type: "catering",
+        customerName: formData.name,
+        customerPhone: formData.phone,
+        customerEmail: formData.email || "N/A",
+        deliveryType: formData.deliveryType,
+        address: formData.deliveryAddress || "Kitchen Pickup",
+        itemsSummary: `${selectedItem.name} (${formData.quantity} ${formData.pricingBasis === "kgs" ? "Kgs" : "Plates"}) ${addonItem ? `+ ${addonItem.name}` : ""}`,
+        totalAmount: estimate.total,
+        timestamp: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
+        status: "Received",
+        eventDate: formData.date,
+        eventTime: formData.time
+      };
+      const existing = JSON.parse(localStorage.getItem("pk_orders_database") || "[]");
+      localStorage.setItem("pk_orders_database", JSON.stringify([orderRecord, ...existing]));
+
+      // Auto-sync to Cloud Spreadsheet Webhook (if enabled)
+      syncOrderToCloud(orderRecord);
+    } catch (err) {
+      console.error("Local order storage error:", err);
+    }
+
     setTimeout(() => {
-      const generatedPasscode = `CATER-PK-${Math.floor(10000 + Math.random() * 90000)}`;
       setConfirmedCatering({
         passcode: generatedPasscode,
         details: { ...formData },
@@ -125,7 +173,14 @@ export default function ReservationSection() {
         pricing: estimate
       });
       setIsSubmitting(false);
-    }, 1800);
+
+      // Try auto-opening WhatsApp tab
+      try {
+        window.open(whatsappUrl, "_blank");
+      } catch (err) {
+        console.log("Popup blocked auto-open:", err);
+      }
+    }, 1200);
   };
 
   const handleCancelCatering = () => {

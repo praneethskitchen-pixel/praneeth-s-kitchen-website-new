@@ -53,3 +53,19 @@ export interface Review {
   avatar: string;
   orderedItems: string[];
 }
+
+export interface OrderRecord {
+  id: string;
+  type: "online_order" | "catering";
+  customerName: string;
+  customerPhone: string;
+  customerEmail?: string;
+  deliveryType: string;
+  address?: string;
+  itemsSummary: string;
+  totalAmount: number;
+  timestamp: string;
+  status: "Received" | "Preparing" | "Dispatched" | "Completed";
+  eventDate?: string;
+  eventTime?: string;
+}
