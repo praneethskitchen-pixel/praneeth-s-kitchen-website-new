@@ -15,7 +15,6 @@ interface LogoProps {
 export default function Logo({ className = "", size = 64, showText = true, variant = "auto" }: LogoProps) {
   const [imgError, setImgError] = useState(false);
 
-  // Custom logo rendering if /logo.png exists
   return (
     <div className={`inline-flex flex-col items-center justify-center ${className}`}>
       {!imgError ? (
@@ -24,7 +23,7 @@ export default function Logo({ className = "", size = 64, showText = true, varia
           style={{ width: size, height: size }}
         >
           <img
-            src="/logo.png"
+            src="/logo.svg"
             alt="Praneeth's Kitchen Logo"
             className="w-full h-full object-contain drop-shadow-md rounded-lg"
             onError={() => setImgError(true)}
