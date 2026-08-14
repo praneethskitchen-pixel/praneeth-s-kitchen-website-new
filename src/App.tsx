@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
@@ -25,6 +25,32 @@ export default function App() {
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
   const [isAdminOrdersOpen, setIsAdminOrdersOpen] = useState<boolean>(false);
   const [faqOpenIdx, setFaqOpenIdx] = useState<number | null>(null);
+
+  // Auto-detect secret route /orderslog, /#orderslog, or ?orderslog
+  useEffect(() => {
+    const checkUrlRoute = () => {
+      const path = window.location.pathname.toLowerCase();
+      const hash = window.location.hash.toLowerCase();
+      const search = window.location.search.toLowerCase();
+
+      if (
+        path.includes("orderslog") || 
+        hash.includes("orderslog") || 
+        search.includes("orderslog") || 
+        path.includes("staff")
+      ) {
+        setIsAdminOrdersOpen(true);
+      }
+    };
+
+    checkUrlRoute();
+    window.addEventListener("popstate", checkUrlRoute);
+    window.addEventListener("hashchange", checkUrlRoute);
+    return () => {
+      window.removeEventListener("popstate", checkUrlRoute);
+      window.removeEventListener("hashchange", checkUrlRoute);
+    };
+  }, []);
 
   // Shopping Cart Managers
   const handleAddItemToCart = (item: MenuItem, quantity: number, instructions?: string) => {

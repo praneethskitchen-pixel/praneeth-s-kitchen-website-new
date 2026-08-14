@@ -109,16 +109,6 @@ export default function Footer({ setActiveTab, openAdminOrders }: FooterProps) {
                   Bulk Orders
                 </button>
               </li>
-              {openAdminOrders && (
-                <li>
-                  <button 
-                    onClick={openAdminOrders} 
-                    className="text-emerald-400 hover:text-emerald-300 font-bold transition-colors text-left cursor-pointer flex items-center gap-1"
-                  >
-                    📊 Orders Log (Excel)
-                  </button>
-                </li>
-              )}
               <li>
                 <span className="text-[10px] text-gold-muted border border-gold/20 px-2 py-0.5 rounded-none uppercase font-mono block w-fit mt-2">
                   Hyderabad

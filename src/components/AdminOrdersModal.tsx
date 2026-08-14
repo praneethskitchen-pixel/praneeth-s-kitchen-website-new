@@ -74,6 +74,52 @@ export default function AdminOrdersModal({ isOpen, onClose }: AdminOrdersModalPr
   const [activeTab, setActiveTab] = useState<"all" | "online_order" | "catering">("online_order");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  // Security & Authentication State
+  const [isAuthorized, setIsAuthorized] = useState<boolean>(() => {
+    return sessionStorage.getItem("pk_staff_authenticated") === "true";
+  });
+  const [pinInput, setPinInput] = useState<string>("");
+  const [pinError, setPinError] = useState<string | null>(null);
+  const [showPin, setShowPin] = useState<boolean>(false);
+  const [customPinInput, setCustomPinInput] = useState<string>("");
+  const [showPinChangeDrawer, setShowPinChangeDrawer] = useState<boolean>(false);
+
+  const getSavedPin = (): string => {
+    return localStorage.getItem("pk_staff_pin") || "9154";
+  };
+
+  const handleVerifyPin = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const currentPin = getSavedPin();
+    if (pinInput.trim() === currentPin) {
+      setIsAuthorized(true);
+      sessionStorage.setItem("pk_staff_authenticated", "true");
+      setPinError(null);
+      setPinInput("");
+      showToast("Access Granted. Welcome to Restaurant Staff Portal!");
+    } else {
+      setPinError("Incorrect Staff PIN. Access denied.");
+    }
+  };
+
+  const handleLockPortal = () => {
+    sessionStorage.removeItem("pk_staff_authenticated");
+    setIsAuthorized(false);
+    setPinInput("");
+    showToast("Staff Portal locked.");
+  };
+
+  const handleSaveNewPin = () => {
+    if (customPinInput.trim().length < 4) {
+      alert("New PIN must be at least 4 digits long.");
+      return;
+    }
+    localStorage.setItem("pk_staff_pin", customPinInput.trim());
+    setCustomPinInput("");
+    setShowPinChangeDrawer(false);
+    showToast("Staff PIN updated successfully!");
+  };
+
   // Cloud Webhook State
   const [webhookUrlInput, setWebhookUrlInput] = useState("");
   const [showSyncSettings, setShowSyncSettings] = useState(false);
@@ -347,24 +393,37 @@ export default function AdminOrdersModal({ isOpen, onClose }: AdminOrdersModalPr
           <div className="bg-charcoal text-cream p-5 border-b border-gold/40 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-gold/20 border border-gold flex items-center justify-center text-gold">
-                <FileSpreadsheet className="h-5 w-5" />
+                <ShieldCheck className="h-5 w-5" />
               </div>
               <div>
                 <h2 className="font-serif-elegant font-bold text-xl sm:text-2xl text-cream flex items-center gap-2">
-                  Kitchen Orders Register & Excel Database
+                  Restaurant Staff Portal
                 </h2>
                 <p className="text-xs text-gold-light font-mono">
-                  Separate registers for Direct Meal Orders vs. Bulk Event Catering
+                  {isAuthorized ? "Protected Kitchen Orders Register & Excel Database" : "Restricted Personnel Access"}
                 </p>
               </div>
             </div>
 
-            <button
-              onClick={onClose}
-              className="p-2 rounded-lg text-cream/70 hover:text-gold hover:bg-white/10 transition-colors"
-            >
-              <X className="h-6 w-6" />
-            </button>
+            <div className="flex items-center gap-2">
+              {isAuthorized && (
+                <button
+                  onClick={handleLockPortal}
+                  className="px-3 py-1.5 bg-rose-900/80 hover:bg-rose-900 text-rose-200 border border-rose-500/50 rounded-lg text-xs font-mono font-bold transition-all flex items-center gap-1"
+                  title="Lock Staff Portal"
+                >
+                  <ShieldCheck className="h-3.5 w-3.5 text-rose-400" />
+                  <span>Lock Portal</span>
+                </button>
+              )}
+
+              <button
+                onClick={onClose}
+                className="p-2 rounded-lg text-cream/70 hover:text-gold hover:bg-white/10 transition-colors"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
           </div>
 
           {/* Toast Banner */}
@@ -374,7 +433,86 @@ export default function AdminOrdersModal({ isOpen, onClose }: AdminOrdersModalPr
             </div>
           )}
 
-          {/* 1. Category Dashboard Stats Row */}
+          {/* SECURITY AUTHENTICATION GATE */}
+          {!isAuthorized ? (
+            <div className="p-8 sm:p-12 flex flex-col items-center justify-center text-center space-y-6 max-w-md mx-auto my-auto w-full">
+              <div className="w-16 h-16 rounded-2xl bg-charcoal text-gold border-2 border-gold flex items-center justify-center shadow-lg">
+                <ShieldCheck className="h-8 w-8 text-gold" />
+              </div>
+
+              <div className="space-y-1.5">
+                <h3 className="font-serif-elegant font-bold text-2xl text-charcoal">
+                  Staff Authentication Required
+                </h3>
+                <p className="text-xs text-neutral-600 font-sans">
+                  This section contains private customer order logs and contact numbers. Enter the 4-digit Restaurant Staff PIN to unlock.
+                </p>
+              </div>
+
+              <form onSubmit={handleVerifyPin} className="w-full space-y-4">
+                <div className="relative">
+                  <input
+                    type={showPin ? "text" : "password"}
+                    value={pinInput}
+                    onChange={(e) => {
+                      setPinInput(e.target.value);
+                      setPinError(null);
+                    }}
+                    placeholder="Enter Staff PIN (e.g. 9154)"
+                    className="w-full text-center text-xl tracking-[0.3em] font-mono font-bold py-3 px-4 bg-cream border-2 border-gold/60 rounded-xl text-charcoal focus:outline-none focus:border-gold shadow-inner"
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPin(!showPin)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono font-bold text-neutral-500 hover:text-charcoal px-2 py-1"
+                  >
+                    {showPin ? "HIDE" : "SHOW"}
+                  </button>
+                </div>
+
+                {pinError && (
+                  <p className="text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 p-2 rounded-lg">
+                    {pinError}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  className="w-full py-3 bg-charcoal text-gold font-bold text-xs uppercase tracking-widest rounded-xl hover:bg-gold hover:text-charcoal transition-all shadow-md"
+                >
+                  Unlock Staff Portal 🔓
+                </button>
+              </form>
+
+              <div className="pt-2 text-[11px] text-neutral-600 font-mono space-y-2 bg-cream-dark p-3.5 rounded-xl border border-gold/40 w-full text-left">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-charcoal flex items-center gap-1">
+                    <Link2 className="h-3.5 w-3.5 text-gold-dark" /> Direct Secret Link:
+                  </span>
+                  <button
+                    onClick={() => {
+                      const directUrl = `${window.location.origin}/orderslog`;
+                      navigator.clipboard.writeText(directUrl);
+                      showToast("Direct Staff Link copied to clipboard!");
+                    }}
+                    className="px-2 py-0.5 bg-gold/20 hover:bg-gold text-charcoal border border-gold/60 rounded font-bold text-[10px] transition-colors flex items-center gap-1"
+                  >
+                    <Copy className="h-3 w-3" /> Copy Link
+                  </button>
+                </div>
+                <p className="text-[10px] text-neutral-500 font-mono break-all bg-cream px-2 py-1 rounded border border-gold/20">
+                  {window.location.origin}/orderslog
+                </p>
+                <div className="pt-1 border-t border-gold/20 flex items-center justify-between text-[10px]">
+                  <span>🔑 Default Staff PIN: <strong className="text-charcoal font-bold">9154</strong></span>
+                  <span className="text-neutral-400">Owner & Manager Access Only</span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* 1. Category Dashboard Stats Row */}
           <div className="bg-cream-light p-4 border-b border-gold/20 shrink-0">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               
@@ -651,6 +789,39 @@ export default function AdminOrdersModal({ isOpen, onClose }: AdminOrdersModalPr
                 </div>
               )}
 
+              {/* Change Staff Security PIN */}
+              <div className="pt-3 border-t border-purple-800/80 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-amber-300 text-[11px] flex items-center gap-1">
+                    <ShieldCheck className="h-3.5 w-3.5" /> Staff Security PIN Configuration
+                  </span>
+                  <button
+                    onClick={() => setShowPinChangeDrawer(!showPinChangeDrawer)}
+                    className="text-purple-300 hover:text-white text-[11px] font-mono underline"
+                  >
+                    {showPinChangeDrawer ? "Cancel" : "Change Staff PIN"}
+                  </button>
+                </div>
+
+                {showPinChangeDrawer && (
+                  <div className="flex items-center gap-2 bg-purple-900/80 p-2.5 rounded-lg border border-purple-700">
+                    <input
+                      type="password"
+                      value={customPinInput}
+                      onChange={(e) => setCustomPinInput(e.target.value)}
+                      placeholder="Enter new 4+ digit Staff PIN"
+                      className="px-3 py-1.5 bg-purple-950 border border-purple-600 rounded text-white font-mono text-xs focus:outline-none focus:border-amber-400 flex-1"
+                    />
+                    <button
+                      onClick={handleSaveNewPin}
+                      className="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-purple-950 font-bold rounded text-xs transition-colors"
+                    >
+                      Update PIN
+                    </button>
+                  </div>
+                )}
+              </div>
+
             </motion.div>
           )}
 
@@ -794,6 +965,9 @@ export default function AdminOrdersModal({ isOpen, onClose }: AdminOrdersModalPr
               Close Database Log
             </button>
           </div>
+
+          </>
+          )}
 
         </motion.div>
       </div>
